@@ -4,23 +4,21 @@
  *
  *    MyStock
  *
- *    Constants
+ *    TradeManager
  *    TODO File description or class description.
  *
  *    @author: danliu
- *    @since:  May 29, 2014
+ *    @since:  May 30, 2014
  *    @version: 1.0
  *
  ******************************************************************************/
-package com.danliu.stock;
+package com.danliu.stock.trade.util;
 
 /**
- * Constants of MyStock.
+ * TradeManager of MyStock.
  * @author danliu
  *
  */
-public class Constants {
-
-    public static final String HISTORY_REQUEST_URL = "https://www.google.com/finance/historical?q=SHA%3A000001&start=30&num=30";
+public class TradeManager {
 
 }
