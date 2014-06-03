@@ -1,6 +1,8 @@
 
 package com.danliu.stock;
 
+import com.danliu.stock.model.Trade;
+import com.danliu.stock.trade.util.TradeManager;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class MainActivity extends Activity {
 
@@ -16,17 +19,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        try {
-            final InputStream in = getAssets().open("finance.txt");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                Log.d("TEST", line);
-            }
-            reader.close();
-        } catch (IOException e) {
+        final List<Trade> tradeInfos = TradeManager.getInstance().getTradeInfos();
+        for (Trade tradeInfo : tradeInfos) {
+            Log.d("TEST", tradeInfo.toString());
         }
-
     }
 
     @Override

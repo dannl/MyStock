@@ -21,7 +21,26 @@ package com.danliu.stock.model;
  */
 public class Stock {
 
+    public static final Stock BANK_OPERATION = new Stock("-1", "Bank Operation");
     private String mId;
     private String mName;
+
+    public Stock(String id, String name) {
+        mId = id;
+        mName = name;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    @Override
+    public String toString() {
+        return " id: " + mId + " name: " + mName;
+    }
 
 }

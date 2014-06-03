@@ -23,7 +23,17 @@ import java.util.HashMap;
  */
 public class Constants {
 
-    public static final String HISTORY_REQUEST_URL = "https://www.google.com/finance/historical?q=SHA%3A000001&start=30&num=30";
+    public static final String SH_FOR_GOOGLE = "SHA";
+
+    public static final String SZ_FOR_GOOGLE = "SZA";
+
+    public static final String SZ_FOR_SINA = "sz";
+
+    public static final String SH_FOR_SINA = "sh";
+
+    public static final String HISTORY_REQUEST_URL = "https://www.google.com/finance/historical?q=%s:%s&start=%s&num=%s";
+
+    public static final String CURRENT_PRICE_URL = "http://hq.sinajs.cn/list=%s%s";
 
     public static final float STAMP_TAX = 0.001f;
 

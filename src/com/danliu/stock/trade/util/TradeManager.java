@@ -15,13 +15,17 @@
 
 package com.danliu.stock.trade.util;
 
-import com.danliu.stock.model.TradeInfo;
+import com.danliu.stock.model.Trade;
 import com.danliu.stock.util.AppContext;
+import org.json.JSONArray;
+import org.json.JSONException;
 import android.R.id;
 import android.content.Context;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,11 +42,13 @@ public class TradeManager {
 
     public interface OnTradeInfosChangedListener {
 
-        public void onTradeInfoChanged(List<TradeInfo> newTradeInfos);
+        public void onTradeInfoChanged(List<Trade> newTradeInfos);
 
     }
 
-    private static final String TRADE_FILE = "/sdcard/finance.txt";
+    private static final String TRADE_FILE_IN_DATA = "trade";
+
+    private static final String TRADE_FILE_IN_SDCARD = "/sdcard/finance.txt";
 
     private static TradeManager sInstance;
 
@@ -54,7 +60,7 @@ public class TradeManager {
     }
 
     private Context mContext;
-    private List<TradeInfo> mTradeInfos;
+    private List<Trade> mTradeInfos;
     private List<WeakReference<OnTradeInfosChangedListener>> mListeners;
 
     private TradeManager(final Context context) {
@@ -63,11 +69,44 @@ public class TradeManager {
     }
 
     private void loadTrades() {
+        final File tradeInfoFile = getTradesFileInData();
+        if (tradeInfoFile.exists()) {
+            loadTradesFromData(tradeInfoFile);
+        } else {
+            loadTradesFromStorage();
+        }
     }
 
-    private void importTrades() {
-        final List<TradeInfo> tradeInfos = new ArrayList<TradeInfo>();
-        final File file = new File(TRADE_FILE);
+    private File getTradesFileInData() {
+        final File tradeInfoFile = new File(mContext.getCacheDir(), TRADE_FILE_IN_SDCARD);
+        return tradeInfoFile;
+    }
+
+    private void loadTradesFromData(final File file) {
+        final List<Trade> tradeInfos = new ArrayList<Trade>();
+        try {
+            InputStream in = new FileInputStream(file);
+            final byte[] buffer = new byte[in.available()];
+            in.read(buffer);
+            JSONArray jsonArray = new JSONArray(new String(buffer));
+            final int length = jsonArray.length();
+            for (int i = 0; i < length; i++) {
+                try {
+                    Trade tradeInfo = Trade.parseJsonObject(jsonArray.getJSONObject(i));
+                    tradeInfos.add(tradeInfo);
+                } catch (JSONException e) {
+                }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        } catch (JSONException e) {
+        }
+        mTradeInfos = tradeInfos;
+    }
+
+    private void loadTradesFromStorage() {
+        final List<Trade> tradeInfos = new ArrayList<Trade>();
+        final File file = new File(TRADE_FILE_IN_SDCARD);
         InputStream in = null;
         try {
             if (file.exists()) {
@@ -84,7 +123,7 @@ public class TradeManager {
         try {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                TradeInfo tradeInfo = TradeInfo.parseFileLine(line);
+                Trade tradeInfo = Trade.parseFileLine(line);
                 if (tradeInfo != null) {
                     tradeInfos.add(tradeInfo);
                 }
@@ -92,11 +131,11 @@ public class TradeManager {
             reader.close();
         } catch (IOException e) {
         }
-        mTradeInfos = tradeInfos;
         save(tradeInfos);
+        mTradeInfos = tradeInfos;
     }
 
-    private void notifyTradeInfosChanged(final List<TradeInfo> tradeInfos) {
+    private void notifyTradeInfosChanged(final List<Trade> tradeInfos) {
         final List<WeakReference<OnTradeInfosChangedListener>> listeners = mListeners;
         if (listeners == null) {
             return;
@@ -113,18 +152,31 @@ public class TradeManager {
         }
     }
 
-    public List<TradeInfo> getTradeInfos() {
+    public List<Trade> getTradeInfos() {
         return mTradeInfos;
     }
 
-    public void appendTradeInfo(final TradeInfo tradeInfo) {
+    public void appendTradeInfo(final Trade tradeInfo) {
         mTradeInfos.add(tradeInfo);
         notifyTradeInfosChanged(mTradeInfos);
         save(mTradeInfos);
     }
 
-    private void save(final List<TradeInfo> tradeInfos) {
-
+    private void save(final List<Trade> tradeInfos) {
+        final JSONArray arrayToSave = new JSONArray();
+        for (Trade tradeInfo : tradeInfos) {
+            arrayToSave.put(tradeInfo.toJsonObject());
+        }
+        final File tradesFileInData = getTradesFileInData();
+        FileOutputStream out;
+        try {
+            out = new FileOutputStream(tradesFileInData);
+            out.write(arrayToSave.toString().getBytes());
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
     }
 
     public void addOnTradeInfosChangedListener(final OnTradeInfosChangedListener listener) {
