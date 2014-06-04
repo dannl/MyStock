@@ -21,9 +21,12 @@ package com.danliu.stock.model;
  */
 public interface KLine {
 
+    public Stock getStock();
     public float getMaxPrice(final Date date);
     public float getMinPrice(final Date date);
     public float getOpenPrice(final Date date);
     public float getClosePrice(final Date date);
+    public Date fromDate();
+    public Date toDate();
 
 }

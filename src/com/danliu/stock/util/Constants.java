@@ -23,6 +23,8 @@ import java.util.HashMap;
  */
 public class Constants {
 
+    public static final long STARTING_DATE = 20140401;
+
     public static final String SH_FOR_GOOGLE = "SHA";
 
     public static final String SZ_FOR_GOOGLE = "SZA";
@@ -31,7 +33,9 @@ public class Constants {
 
     public static final String SH_FOR_SINA = "sh";
 
-    public static final String HISTORY_REQUEST_URL = "https://www.google.com/finance/historical?q=%s:%s&start=%s&num=%s";
+    public static final String HISTORY_DOWNLOAD_URL = "http://ichart.finance.yahoo.com/table.csv?s=600000.SS&a=10&b=10&c=1999&d=05&e=4&f=2014&g=d&ignore=.csv";
+
+    public static final String HISTORY_REQUEST_URL = "http://www.google.com/finance/historical?q=%s:%s&start=%s&num=%s";
 
     public static final String CURRENT_PRICE_URL = "http://hq.sinajs.cn/list=%s%s";
 

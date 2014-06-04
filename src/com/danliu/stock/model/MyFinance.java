@@ -4,38 +4,29 @@
  *
  *    MyStock
  *
- *    TradePair
+ *    MyFinance
  *    TODO File description or class description.
  *
  *    @author: danliu
- *    @since:  Jun 3, 2014
+ *    @since:  Jun 4, 2014
  *    @version: 1.0
  *
  ******************************************************************************/
 package com.danliu.stock.model;
 
-import android.text.TextUtils;
+import java.util.List;
 
 /**
- * TradePair of MyStock.
+ * MyFinance of MyStock.
  * @author danliu
  *
  */
-public class TradePair implements KLine {
+public class MyFinance implements KLine {
 
-    private Trade mFromTrade;
-    private Trade mToTrade;
+    private List<KLine> mKLines;
 
-    public TradePair(final Trade from, final Trade to) {
-        if (!TextUtils.equals(from.getStock().getId(), to.getStock().getId())) {
-            throw new IllegalArgumentException("we can not make a trade pair between deferent stock!");
-        }
-        mFromTrade = from;
-        mToTrade = to;
-    }
-
-    public String getStockId() {
-        return mFromTrade.getStock().getId();
+    public MyFinance(final List<KLine> kLines) {
+        mKLines = kLines;
     }
 
     @Override
@@ -68,9 +59,10 @@ public class TradePair implements KLine {
         return null;
     }
 
+
     @Override
     public Stock getStock() {
-        return mFromTrade.getStock();
+        return Stock.MY_FINACE;
     }
 
 }

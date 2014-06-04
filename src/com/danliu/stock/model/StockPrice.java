@@ -14,6 +14,8 @@
  ******************************************************************************/
 package com.danliu.stock.model;
 
+import org.json.JSONObject;
+
 /**
  * StockPrice of MyStock.
  * @author danliu
@@ -39,6 +41,25 @@ public class StockPrice implements KLine {
     @Override
     public float getClosePrice(Date date) {
         return 0;
+    }
+
+    @Override
+    public Date fromDate() {
+        return null;
+    }
+
+    @Override
+    public Date toDate() {
+        return null;
+    }
+
+    @Override
+    public Stock getStock() {
+        return null;
+    }
+
+    public static StockPrice parseJson(Stock stock, JSONObject obj) {
+        return null;
     }
 
 }

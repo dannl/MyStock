@@ -47,4 +47,19 @@ public class SingleTrade implements KLine {
         return mTrade.getTradeAmount();
     }
 
+    @Override
+    public Date fromDate() {
+        return null;
+    }
+
+    @Override
+    public Date toDate() {
+        return null;
+    }
+
+    @Override
+    public Stock getStock() {
+        return mTrade.getStock();
+    }
+
 }

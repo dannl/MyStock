@@ -4,29 +4,26 @@
  *
  *    MyStock
  *
- *    DateTimeGenerator
+ *    OnPriceLoadedListener
  *    TODO File description or class description.
  *
  *    @author: danliu
- *    @since:  May 30, 2014
+ *    @since:  Jun 4, 2014
  *    @version: 1.0
  *
  ******************************************************************************/
-package com.danliu.stock.util;
+package com.danliu.stock.trade.util;
 
-import com.danliu.stock.model.Date;
-import java.util.HashMap;
+import com.danliu.stock.model.StockPrice;
+import java.util.List;
 
 /**
- * DateTimeGenerator of MyStock.
+ * OnPriceLoadedListener of MyStock.
  * @author danliu
  *
  */
-public class DateTimeGenerator {
+public interface PriceLoadingListener {
 
-    private static final HashMap<String, Long> MONTH_NUM_MAP = new HashMap<String, Long>();
-
-    static {
-    }
+    public void onPriceLoaded(final List<StockPrice> prices);
 
 }
