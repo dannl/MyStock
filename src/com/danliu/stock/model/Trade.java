@@ -145,13 +145,13 @@ public class Trade {
             if (tradeString.indexOf(TradeType.TRANSFER_IN.toString()) > 0
                     || tradeString.indexOf(TradeType.TRANSFER_OUT.toString()) > 0) {
                 tradeInfo.mStock = Stock.BANK_OPERATION;
-                tradeInfo.mTradeDate = new Date(Long.parseLong(splitResult[INDEX_DATE - 1]));
+                tradeInfo.mTradeDate = Date.parseDateFromNumber(Long.parseLong(splitResult[INDEX_DATE - 1]));
                 tradeInfo.mTradeAmount = Float.parseFloat(splitResult[INDEX_AMOUNT - 1]);
                 tradeInfo.mBalance = Float.parseFloat(splitResult[INDEX_BALANCE - 1]);
                 tradeInfo.mTradeType = TradeType.get(splitResult[INDEX_TYPE - 1]);
             } else {
                 tradeInfo.mStock = new Stock(splitResult[INDEX_ID], splitResult[INDEX_NAME]);
-                tradeInfo.mTradeDate = new Date(Long.parseLong(splitResult[INDEX_DATE]));
+                tradeInfo.mTradeDate = Date.parseDateFromNumber(Long.parseLong(splitResult[INDEX_DATE]));
                 tradeInfo.mTradeAmount = Float.parseFloat(splitResult[INDEX_AMOUNT]);
                 tradeInfo.mBalance = Float.parseFloat(splitResult[INDEX_BALANCE]);
                 tradeInfo.mTradeType = TradeType.get(splitResult[INDEX_TYPE]);
@@ -207,7 +207,7 @@ public class Trade {
         result.mBalance = Float.parseFloat(jsonObject.getString(JSON_BALANCE));
         result.mTradeAmount = Float.parseFloat(jsonObject.getString(JSON_AMOUNT));
         result.mTradeCount = Float.parseFloat(jsonObject.getString(JSON_COUNT));
-        result.mTradeDate = new Date(jsonObject.getLong(JSON_DATE));
+        result.mTradeDate = Date.parseDateFromNumber(jsonObject.getLong(JSON_DATE));
         result.mTradePrice = Float.parseFloat(jsonObject.getString(JSON_PRICE));
         result.mTradeType = TradeType.get(jsonObject.getString(JSON_TYPE));
         return result;

@@ -2,8 +2,10 @@
 package com.danliu.stock;
 
 import com.danliu.stock.model.Stock;
+import com.danliu.stock.model.StockPrice;
 import com.danliu.stock.model.Trade;
-import com.danliu.stock.trade.util.GooglePricesManager;
+import com.danliu.stock.trade.util.SinaPriceManager;
+import com.danliu.stock.trade.util.YahooPriceManager;
 import com.danliu.stock.trade.util.TradeManager;
 import com.dolphin.browser.util.IOUtilities;
 import android.app.Activity;
@@ -48,7 +50,8 @@ public class MainActivity extends Activity {
             @Override
             protected Void doInBackground(Void... params) {
                 final Stock stock = new Stock("600000", "浦发银行");
-                GooglePricesManager.getInstance().getPrices(stock);
+//                YahooPriceManager.getInstance().getPrices(stock);
+                StockPrice price = SinaPriceManager.getInstance().requestCurrentPrice(stock);
                 return null;
             }};
         task.execute();

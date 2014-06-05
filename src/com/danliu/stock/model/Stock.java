@@ -29,6 +29,7 @@ public class Stock {
     private String mName;
     private String mPrefixForGoogle;
     private String mPrefixForSina;
+    private String mPrefixForYahoo;
 
     public Stock(String id, String name) {
         mId = id;
@@ -36,10 +37,16 @@ public class Stock {
         if (id.startsWith("60")) {
             mPrefixForGoogle = Constants.SH_FOR_GOOGLE;
             mPrefixForSina = Constants.SH_FOR_SINA;
+            mPrefixForYahoo = Constants.SH_FOR_YAHOO;
         } else {
             mPrefixForGoogle = Constants.SZ_FOR_GOOGLE;
             mPrefixForSina = Constants.SZ_FOR_SINA;
+            mPrefixForYahoo = Constants.SZ_FOR_YAHOO;
         }
+    }
+
+    public String getPrefixForYahoo() {
+        return mPrefixForYahoo;
     }
 
     public String getPrefixForGoogle() {

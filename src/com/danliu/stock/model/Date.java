@@ -24,6 +24,10 @@ import java.util.HashMap;
  */
 public class Date implements Comparable<Date> {
 
+    /**
+     * FACTOR
+     */
+    private static final int FACTOR = 1000000;
     private static final HashMap<String, Integer> MONTH = new HashMap<String, Integer>();
 
      static {
@@ -45,28 +49,28 @@ public class Date implements Comparable<Date> {
     private long mRealDate;
     private long mDate;
 
-    public Date(final long date) {
-        mRealDate = date;
-        mDate = date / 1000000;
-    }
+//    public Date(final long date) {
+//        mRealDate = date;
+//        mDate = date / 1000000;
+//    }
 
     private Date() {
     }
 
-    public long getDate() {
+    public long getDateNumber() {
         return mDate;
     }
 
-    public int getYear() {
+    public int year() {
         return (int) (mDate / 10000);
     }
 
-    public int getMonth() {
+    public int month() {
         return (int) (mDate % 10000 / 100);
     }
 
-    public int getDay() {
-        return (int) (mDate % 1000000);
+    public int day() {
+        return (int) (mDate % 100);
     }
 
     @Override
@@ -85,7 +89,7 @@ public class Date implements Comparable<Date> {
         int month = calendar.get(Calendar.MONTH) + 1;
         int year = calendar.get(Calendar.YEAR);
         date.mDate = year * 10000 + month * 100 + day;
-        date.mRealDate = date.mDate * 1000000;
+        date.mRealDate = date.mDate * FACTOR;
         return date;
     }
 
@@ -99,8 +103,69 @@ public class Date implements Comparable<Date> {
         int day = Integer.parseInt(splited[1].substring(0, splited[1].lastIndexOf(",")));
         int year = Integer.parseInt(splited[2]);
         date.mDate = year * 10000 + month * 100 + day;
-        date.mRealDate = date.mDate * 1000000;
+        date.mRealDate = date.mDate * FACTOR;
         return date;
+    }
+
+    /**
+     * 2014-06-04
+     */
+    public static final Date parseDateFromYahooStr(String dateString) {
+        final Date date = new Date();
+        dateString = dateString.replaceAll("-", "");
+        date.mDate = Long.parseLong(dateString);
+        date.mRealDate = date.mDate * FACTOR;
+        return date;
+    }
+
+    public static final Date parseDateFromNumber(final long dateNumber) {
+        final Date date = new Date();
+        if (dateNumber / 10000000000000l > 0) {
+            date.mRealDate = dateNumber;
+            date.mDate = dateNumber / FACTOR;
+        } else if (dateNumber / 10000000 > 0) {
+            date.mDate = dateNumber;
+            date.mRealDate = dateNumber * FACTOR;
+        } else {
+            throw new IllegalArgumentException("bad format of number.");
+        }
+        return date;
+    }
+
+    public void yesterday() {
+        int day = day();
+        int month = month();
+        int year = year();
+        if (day == 1) {
+            if (month == 1) {
+                year -=1;
+                month = 12;
+            } else {
+                month -= 1;
+                if (month == 2) {
+                    if ((year - 1988) %4 == 0) {
+                        day = 29;
+                    } else {
+                        day = 28;
+                    }
+                } else if (month % 2 == 0) {
+                    if (month < 8) {
+                        day = 30;
+                    } else {
+                        day = 31;
+                    }
+                } else {
+                    if (month < 7) {
+                        day = 31;
+                    } else {
+                        day = 30;
+                    }
+                }
+            }
+        } else {
+            day -= 1;
+        }
+        mDate = year * 10000 + month * 100 + day;
     }
 
 }

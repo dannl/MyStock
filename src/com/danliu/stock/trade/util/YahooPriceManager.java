@@ -12,6 +12,7 @@
  *    @version: 1.0
  *
  ******************************************************************************/
+
 package com.danliu.stock.trade.util;
 
 import com.danliu.stock.model.Date;
@@ -19,53 +20,45 @@ import com.danliu.stock.model.Stock;
 import com.danliu.stock.model.StockPrice;
 import com.danliu.stock.util.AppContext;
 import com.danliu.stock.util.Constants;
-import com.danliu.stock.util.HttpHelper;
 import com.danliu.util.Log;
-import com.dolphin.browser.Network.HttpRequester;
 import com.dolphin.browser.Network.HttpUtils;
-import com.dolphin.browser.Network.HttpUtils.HttpRequestResult;
 import com.dolphin.browser.util.IOUtilities;
-import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
-
+import java.util.zip.GZIPInputStream;
 
 /**
  * PriceManager of MyStock.
- * @author danliu
  *
+ * @author danliu
  */
-public class GooglePricesManager {
+public class YahooPriceManager {
 
-    private static final String DESKTOP_USERAGENT_FORMAT = "Mozilla/5.0 (Macintosh; "
-            + "U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/10 (KHTML, "
-            + "like Gecko) Version/5.0 Safari/10";
-    private static GooglePricesManager sInstance;
-    private static final String CACHE_DIR = "google";
-    private static final String PREF_FILE_NAME = "google";
+    private static YahooPriceManager sInstance;
+    private static final String CACHE_DIR = "yahoo";
+    private static final String PREF_FILE_NAME = "yahoo";
     private static final String PREF_LAST_UPDATE = "last_update";
     private static final HashMap<String, List<StockPrice>> STOCK_PRICES = new HashMap<String, List<StockPrice>>();
-    private static final int MAX_PRICE_COUNT = 200;
 
-    public static final GooglePricesManager getInstance() {
+    public static final YahooPriceManager getInstance() {
         if (sInstance == null) {
-            sInstance = new GooglePricesManager(AppContext.getInstance());
+            sInstance = new YahooPriceManager(AppContext.getInstance());
         }
         return sInstance;
     }
@@ -73,7 +66,7 @@ public class GooglePricesManager {
     private Context mContext;
     private SharedPreferences mPreferences;
 
-    private GooglePricesManager(final Context context) {
+    private YahooPriceManager(final Context context) {
         mContext = context;
         mPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
@@ -83,8 +76,8 @@ public class GooglePricesManager {
         final Calendar calendar = Calendar.getInstance();
         final Date date = Date.parseDateFromCalendar(calendar);
         final long lastUpdate = mPreferences.getLong(PREF_LAST_UPDATE, 0);
-        if (date.getDate() > lastUpdate) {
-            //we need to update it.
+        if (date.getDateNumber() > lastUpdate) {
+            // we need to update it.
             return requestStockPrices(stock);
         } else if (!STOCK_PRICES.containsKey(stockId)) {
             return parseStockFromFile(stock);
@@ -94,33 +87,72 @@ public class GooglePricesManager {
 
     }
 
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    @SuppressWarnings("resource")
     private List<StockPrice> requestStockPrices(final Stock stock) {
         final Date currentDate = Date.parseDateFromCalendar(Calendar.getInstance());
-        int count = (int) (currentDate.getDate() - Math.min(Constants.STARTING_DATE, mPreferences.getLong(PREF_LAST_UPDATE, Constants.STARTING_DATE)));
-        final List<StockPrice> result = new ArrayList<StockPrice>();
-        int startingIndex = 0;
-        while (count > 0) {
-//            final String url = String.format(Constants.HISTORY_REQUEST_URL, stock.getPrefixForGoogle(), stock.getId(), startingIndex, Math.min(count, MAX_PRICE_COUNT));
-            final String url = "http://finance.yahoo.com/q/hp?s=600000.SS&a=10&b=10&c=1999&d=05&e=4&f=2014&g=d";
-            HttpRequester.Builder builder = new HttpRequester.Builder(url);
-            builder.ConnectTimeout(20000);
-            builder.UserAgent(DESKTOP_USERAGENT_FORMAT);
-            try {
-                HttpRequestResult requestResult = builder.build().request();
-                if (requestResult.status.getStatusCode() == HttpStatus.SC_OK) {
-                    String content = HttpUtils.decodeEntityAsString(requestResult.entity);
-                    content = content.replaceAll("\n","");
-                    final File toFile = new File(getCacheDir(), "temp.txt");
-                    IOUtilities.saveToFile(toFile, content, "UTF-8");
-                    Pattern pattern = Pattern.compile(content);
+        currentDate.yesterday();
+        final long lastUpdate = mPreferences.getLong(PREF_LAST_UPDATE, Constants.STARTING_DATE);
+        final Date fromDate = Date.parseDateFromNumber(lastUpdate);
+        // http://ichart.finance.yahoo.com/table.csv?s=600000.SS&a=10&b=10&c=1999&d=05&e=4&f=2014&g=d&ignore=.csv
+        final String downloadUrl = String.format(Constants.HISTORY_DOWNLOAD_URL, stock.getId(),
+                stock.getPrefixForYahoo(), fromDate.month(), fromDate.day(), fromDate.year(),
+                currentDate.month(), currentDate.day(), currentDate.year());
+        Log.d("TEST", downloadUrl);
+        final File tempFile = new File(getCacheDir(), "temp");
+        HttpUtils.downloadFile(downloadUrl, tempFile, 1024 * 1024 * 10, false);
+        final List<StockPrice> prices = dealWithRequestResult(stock, tempFile);
+        mPreferences.edit().putLong(stock.getId(), currentDate.getDateNumber()).apply();;
+        return prices;
+    }
+
+    private List<StockPrice> dealWithRequestResult(final Stock stock, final File tempFile) {
+        final List<StockPrice> prices = new ArrayList<StockPrice>();
+        try {
+            @SuppressWarnings("resource")
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tempFile))));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                Log.d("TEST", line);
+                try {
+                    final StockPrice price = StockPrice.parseStringLine(line);
+                    prices.add(price);
+                } catch (Exception e) {
                 }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+        boolean flushCache = !prices.isEmpty();
+        final File cachedFile = new File(getCacheDir(), stock.getId());
+        try {
+            FileInputStream in = new FileInputStream(cachedFile);
+            final byte[] buffer = new byte[in.available()];
+            JSONArray array = new JSONArray(new String(buffer));
+            int length = array.length();
+            for (int i = 0; i < length; i++) {
+                try {
+                    final StockPrice price = StockPrice.parseJson(array.getJSONObject(i));
+                    prices.add(price);
+                } catch (Exception e) {
+                }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        } catch (JSONException e) {
+        }
+        if (flushCache) {
+            JSONArray arrayToSave = new JSONArray();
+            for (int i = 0; i < prices.size(); i++) {
+                arrayToSave.put(prices.get(i).toJsonObject());
+            }
+            try {
+                IOUtilities.saveToFile(cachedFile, arrayToSave.toString(), "UTF-8");
             } catch (IOException e) {
                 Log.w(e);
             }
-            count -= MAX_PRICE_COUNT;
-            startingIndex += MAX_PRICE_COUNT;
         }
-        return null;
+        return prices;
     }
 
     private List<StockPrice> parseStockFromFile(final Stock stock) {
@@ -135,7 +167,7 @@ public class GooglePricesManager {
             final List<StockPrice> prices = new ArrayList<StockPrice>(length);
             for (int i = 0; i < length; i++) {
                 final JSONObject obj = pricesArray.getJSONObject(i);
-                final StockPrice priceItem = StockPrice.parseJson(stock, obj);
+                final StockPrice priceItem = StockPrice.parseJson(obj);
                 prices.add(priceItem);
             }
             STOCK_PRICES.put(stockId, prices);
