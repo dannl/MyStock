@@ -1,6 +1,7 @@
 
 package com.danliu.stock;
 
+import com.danliu.stock.model.MyFinance;
 import com.danliu.stock.model.Stock;
 import com.danliu.stock.model.StockPrice;
 import com.danliu.stock.model.Trade;
@@ -51,7 +52,9 @@ public class MainActivity extends Activity {
             protected Void doInBackground(Void... params) {
                 final Stock stock = new Stock("600000", "浦发银行");
 //                YahooPriceManager.getInstance().getPrices(stock);
-                StockPrice price = SinaPriceManager.getInstance().requestCurrentPrice(stock);
+//                StockPrice price = SinaPriceManager.getInstance().getPrice(stock);
+                TradeManager.getInstance().getAllTrades();
+                MyFinance finance = new MyFinance(null);
                 return null;
             }};
         task.execute();

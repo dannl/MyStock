@@ -14,6 +14,8 @@
  ******************************************************************************/
 package com.danliu.stock.model;
 
+import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -29,6 +31,7 @@ public class Date implements Comparable<Date> {
      */
     private static final int FACTOR = 1000000;
     private static final HashMap<String, Integer> MONTH = new HashMap<String, Integer>();
+    private static final LongSparseArray<Date> DATE_CACHE = new LongSparseArray<Date>();
 
      static {
          MONTH.put("Jan", 1);
@@ -48,11 +51,6 @@ public class Date implements Comparable<Date> {
 
     private long mRealDate;
     private long mDate;
-
-//    public Date(final long date) {
-//        mRealDate = date;
-//        mDate = date / 1000000;
-//    }
 
     private Date() {
     }
@@ -90,7 +88,7 @@ public class Date implements Comparable<Date> {
         int year = calendar.get(Calendar.YEAR);
         date.mDate = year * 10000 + month * 100 + day;
         date.mRealDate = date.mDate * FACTOR;
-        return date;
+        return getCachedDate(date);
     }
 
     /**
@@ -104,7 +102,7 @@ public class Date implements Comparable<Date> {
         int year = Integer.parseInt(splited[2]);
         date.mDate = year * 10000 + month * 100 + day;
         date.mRealDate = date.mDate * FACTOR;
-        return date;
+        return getCachedDate(date);
     }
 
     /**
@@ -115,7 +113,7 @@ public class Date implements Comparable<Date> {
         dateString = dateString.replaceAll("-", "");
         date.mDate = Long.parseLong(dateString);
         date.mRealDate = date.mDate * FACTOR;
-        return date;
+        return getCachedDate(date);
     }
 
     public static final Date parseDateFromNumber(final long dateNumber) {
@@ -129,10 +127,10 @@ public class Date implements Comparable<Date> {
         } else {
             throw new IllegalArgumentException("bad format of number.");
         }
-        return date;
+        return getCachedDate(date);
     }
 
-    public void yesterday() {
+    public Date yesterday() {
         int day = day();
         int month = month();
         int year = year();
@@ -165,7 +163,26 @@ public class Date implements Comparable<Date> {
         } else {
             day -= 1;
         }
-        mDate = year * 10000 + month * 100 + day;
+        final long dateNum = year * 10000 + month * 100 + day;
+        if (DATE_CACHE.get(dateNum) == null) {
+            final Date date = new Date();
+            date.mDate = dateNum;
+            date.mRealDate = dateNum * FACTOR;
+            DATE_CACHE.put(dateNum, date);
+            return date;
+        } else {
+            return DATE_CACHE.get(dateNum);
+        }
+    }
+
+    private static final Date getCachedDate(final Date date) {
+        long dateNumber = date.getDateNumber();
+        if (DATE_CACHE.get(dateNumber) == null) {
+            DATE_CACHE.put(dateNumber, date);
+            return date;
+        } else {
+            return DATE_CACHE.get(dateNumber);
+        }
     }
 
 }

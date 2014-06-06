@@ -29,37 +29,57 @@ public class SingleTrade implements KLine {
 
     @Override
     public float getMaxPrice(Date date) {
-        return mTrade.getTradeAmount();
+        if (date.equals(mTrade.getTradeDate())) {
+            return mTrade.getTradeAmount();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public float getMinPrice(Date date) {
-        return mTrade.getTradeAmount();
+        if (date.equals(mTrade.getTradeDate())) {
+            return mTrade.getTradeAmount();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public float getOpenPrice(Date date) {
-        return mTrade.getTradeAmount();
+        if (date.equals(mTrade.getTradeDate())) {
+            return mTrade.getTradeAmount();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public float getClosePrice(Date date) {
-        return mTrade.getTradeAmount();
+        if (date.equals(mTrade.getTradeDate())) {
+            return mTrade.getTradeAmount();
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public Date fromDate() {
-        return null;
+        return mTrade.getTradeDate();
     }
 
     @Override
     public Date toDate() {
-        return null;
+        return mTrade.getTradeDate();
     }
 
     @Override
     public Stock getStock() {
         return mTrade.getStock();
+    }
+
+    @Override
+    public void refreshPrices() {
     }
 
 }

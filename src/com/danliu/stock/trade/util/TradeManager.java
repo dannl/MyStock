@@ -15,6 +15,7 @@
 
 package com.danliu.stock.trade.util;
 
+import com.danliu.stock.model.KLine;
 import com.danliu.stock.model.Trade;
 import com.danliu.stock.util.AppContext;
 import org.json.JSONArray;
@@ -181,6 +182,10 @@ public class TradeManager {
 
     public void addOnTradeInfosChangedListener(final OnTradeInfosChangedListener listener) {
 
+    }
+
+    public List<KLine> getTradeKLines() {
+        return null;
     }
 
 }

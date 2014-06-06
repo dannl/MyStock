@@ -14,6 +14,8 @@
  ******************************************************************************/
 package com.danliu.stock.model;
 
+import com.danliu.stock.util.Constants;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -31,32 +33,60 @@ public class MyFinance implements KLine {
 
     @Override
     public float getMaxPrice(Date date) {
-        return 0;
+        final List<KLine> kLines = mKLines;
+        float capital = getCapitalInDate(date, kLines);
+        for (KLine kLine : kLines) {
+            if (kLine instanceof TradePair) {
+                capital += kLine.getMaxPrice(date);
+            }
+        }
+        return capital;
     }
 
     @Override
     public float getMinPrice(Date date) {
-        return 0;
+        final List<KLine> kLines = mKLines;
+        float capital = getCapitalInDate(date, kLines);
+        for (KLine kLine : kLines) {
+            if (kLine instanceof TradePair) {
+                capital += kLine.getMinPrice(date);
+            }
+        }
+        return capital;
     }
 
     @Override
     public float getOpenPrice(Date date) {
-        return 0;
+        final List<KLine> kLines = mKLines;
+        float capital = getCapitalInDate(date, kLines);
+        for (KLine kLine : kLines) {
+            if (kLine instanceof TradePair) {
+                capital += kLine.getOpenPrice(date);
+            }
+        }
+        return capital;
     }
 
     @Override
     public float getClosePrice(Date date) {
-        return 0;
+        final List<KLine> kLines = mKLines;
+        float capital = getCapitalInDate(date, kLines);
+        for (KLine kLine : kLines) {
+            if (kLine instanceof TradePair) {
+                capital += kLine.getClosePrice(date);
+            }
+        }
+        return capital;
     }
 
     @Override
     public Date fromDate() {
-        return null;
+        return Date.parseDateFromNumber(Constants.STARTING_DATE);
     }
 
     @Override
     public Date toDate() {
-        return null;
+        return Date.parseDateFromCalendar(Calendar.getInstance());
     }
 
 
@@ -64,5 +94,26 @@ public class MyFinance implements KLine {
     public Stock getStock() {
         return Stock.MY_FINACE;
     }
+
+    @Override
+    public void refreshPrices() {
+        final List<KLine> kLines = mKLines;
+        for (KLine kLine : kLines) {
+            kLine.refreshPrices();
+        }
+    }
+
+    private float getCapitalInDate(Date date, final List<KLine> kLines) {
+        final int size = kLines.size();
+        float capital = 0;
+        for (int i = 0; i < size; i++) {
+            final KLine kLine = kLines.get(i);
+            if (kLine instanceof SingleTrade && kLine.fromDate().getDateNumber() < date.getDateNumber()) {
+                capital += kLine.getOpenPrice(kLine.fromDate());
+            }
+        }
+        return capital;
+    }
+
 
 }

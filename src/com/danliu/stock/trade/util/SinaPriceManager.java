@@ -50,7 +50,7 @@ public class SinaPriceManager {
     private SinaPriceManager() {
     }
 
-    public StockPrice requestCurrentPrice(final Stock stock) {
+    public StockPrice getPrice(final Stock stock) {
         final String url = String.format(Constants.CURRENT_PRICE_URL, stock.getPrefixForSina(),
                 stock.getId());
         HttpRequester.Builder builder = new HttpRequester.Builder(url);
@@ -63,6 +63,7 @@ public class SinaPriceManager {
                 return price;
             }
         } catch (IOException e) {
+        } catch (Exception e) {
         }
         return null;
 

@@ -120,4 +120,13 @@ public class StockPrice implements KLineItem {
         return result;
     }
 
+    public void set(StockPrice price) {
+        this.mDate = price.mDate;
+        this.mOpen = price.mOpen;
+        this.mMax = price.mMax;
+        this.mMin = price.mMin;
+        this.mClose = price.mClose;
+        this.mVolume = price.mVolume;
+    }
+
 }

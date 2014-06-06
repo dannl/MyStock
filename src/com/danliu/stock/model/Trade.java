@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 public class Trade {
 
     public enum TradeType {
-        BUY(0), SELL(1), TRANSFER_IN(2), TRANSFER_OUT(3), TAX(4), NONE(5);
+        BUY(0), SELL(1), TRANSFER_IN(2), TRANSFER_OUT(3), TAX(4), NONE(5), NOT_TRADED(6);
 
         private static final Pattern TYPE_PATERN = Pattern.compile("(.+)\\(.+\\)");
         private int mType;
@@ -107,6 +107,12 @@ public class Trade {
     private float mTradeAmount;
     private float mBalance;
     private TradeType mTradeType;
+
+    protected Trade(final Stock stock) {
+        mStock = stock;
+    }
+
+    private Trade(){}
 
     public Stock getStock() {
         return mStock;
@@ -212,4 +218,5 @@ public class Trade {
         result.mTradeType = TradeType.get(jsonObject.getString(JSON_TYPE));
         return result;
     }
+
 }

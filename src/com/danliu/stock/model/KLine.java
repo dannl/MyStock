@@ -28,5 +28,6 @@ public interface KLine {
     public float getClosePrice(final Date date);
     public Date fromDate();
     public Date toDate();
+    public void refreshPrices();
 
 }
