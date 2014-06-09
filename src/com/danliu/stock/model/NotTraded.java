@@ -39,7 +39,7 @@ public class NotTraded extends Trade {
     }
 
     @Override
-    public float getTradeCount() {
+    public int getTradeCount() {
         throw new IllegalAccessError("not supported.");
     }
 

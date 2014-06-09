@@ -1,6 +1,8 @@
 
 package com.danliu.stock;
 
+import com.danliu.stock.model.Date;
+import com.danliu.stock.model.KLine;
 import com.danliu.stock.model.MyFinance;
 import com.danliu.stock.model.Stock;
 import com.danliu.stock.model.StockPrice;
@@ -8,6 +10,7 @@ import com.danliu.stock.model.Trade;
 import com.danliu.stock.trade.util.SinaPriceManager;
 import com.danliu.stock.trade.util.YahooPriceManager;
 import com.danliu.stock.trade.util.TradeManager;
+import com.danliu.stock.util.Constants;
 import com.dolphin.browser.util.IOUtilities;
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -22,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -30,8 +34,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        final List<Trade> tradeInfos = TradeManager.getInstance().getTradeInfos();
+        final List<Trade> tradeInfos = TradeManager.getInstance().getAllTrades();
 //        for (Trade tradeInfo : tradeInfos) {
+//            for (int i = 0; i < 10000; i++) {
+//                if (i == 1) {
+//                    break;
+//                }
+//            }
 //            Log.d("TEST", tradeInfo.toString());
 //        }
         test();
@@ -53,8 +62,18 @@ public class MainActivity extends Activity {
                 final Stock stock = new Stock("600000", "浦发银行");
 //                YahooPriceManager.getInstance().getPrices(stock);
 //                StockPrice price = SinaPriceManager.getInstance().getPrice(stock);
-                TradeManager.getInstance().getAllTrades();
-                MyFinance finance = new MyFinance(null);
+                MyFinance finance = new MyFinance();
+                finance.loadKLines();
+                finance.refreshPrices();
+                Date fromDate = Date.parseDateFromNumber(Constants.STARTING_DATE);
+                Date toDate = Date.parseDateFromCalendar(Calendar.getInstance());
+                for (long i = fromDate.getDateNumber(); i <= toDate.getDateNumber(); i++) {
+                    if (!Date.isValidateDate(i)) {
+                        continue;
+                    }
+                    Date date = Date.parseDateFromNumber(i);
+                    Log.d("TEST", "date: " + date.toString() + " OPEN: " + finance.getOpenPrice(date) + " MAX:" + finance.getMaxPrice(date) + " MIN: " + finance.getMinPrice(date) + " CLOSE: " + finance.getClosePrice(date));
+                }
                 return null;
             }};
         task.execute();

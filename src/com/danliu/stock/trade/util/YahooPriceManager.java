@@ -53,7 +53,6 @@ public class YahooPriceManager {
     private static YahooPriceManager sInstance;
     private static final String CACHE_DIR = "yahoo";
     private static final String PREF_FILE_NAME = "yahoo";
-    private static final String PREF_LAST_UPDATE = "last_update";
     private static final HashMap<String, List<StockPrice>> STOCK_PRICES = new HashMap<String, List<StockPrice>>();
 
     public static final YahooPriceManager getInstance() {
@@ -75,7 +74,7 @@ public class YahooPriceManager {
         final String stockId = stock.getId();
         final Calendar calendar = Calendar.getInstance();
         final Date date = Date.parseDateFromCalendar(calendar);
-        final long lastUpdate = mPreferences.getLong(PREF_LAST_UPDATE, 0);
+        final long lastUpdate = mPreferences.getLong(stockId, 0);
         if (date.getDateNumber() > lastUpdate) {
             // we need to update it.
             return requestStockPrices(stock);
@@ -92,13 +91,13 @@ public class YahooPriceManager {
     private List<StockPrice> requestStockPrices(final Stock stock) {
         final Date currentDate = Date.parseDateFromCalendar(Calendar.getInstance());
         currentDate.yesterday();
-        final long lastUpdate = mPreferences.getLong(PREF_LAST_UPDATE, Constants.STARTING_DATE);
+        final long lastUpdate = mPreferences.getLong(stock.getId(), Constants.STARTING_DATE);
         final Date fromDate = Date.parseDateFromNumber(lastUpdate);
         // http://ichart.finance.yahoo.com/table.csv?s=600000.SS&a=10&b=10&c=1999&d=05&e=4&f=2014&g=d&ignore=.csv
         final String downloadUrl = String.format(Constants.HISTORY_DOWNLOAD_URL, stock.getId(),
-                stock.getPrefixForYahoo(), fromDate.month(), fromDate.day(), fromDate.year(),
+                stock.getPrefixForYahoo(), fromDate.month() - 1, fromDate.day(), fromDate.year(),
                 currentDate.month(), currentDate.day(), currentDate.year());
-        Log.d("TEST", downloadUrl);
+//        Log.d("TEST", downloadUrl);
         final File tempFile = new File(getCacheDir(), "temp");
         HttpUtils.downloadFile(downloadUrl, tempFile, 1024 * 1024 * 10, false);
         final List<StockPrice> prices = dealWithRequestResult(stock, tempFile);
@@ -113,7 +112,7 @@ public class YahooPriceManager {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tempFile))));
             String line = null;
             while ((line = reader.readLine()) != null) {
-                Log.d("TEST", line);
+//                Log.d("TEST", line);
                 try {
                     final StockPrice price = StockPrice.parseStringLine(line);
                     prices.add(price);

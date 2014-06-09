@@ -71,15 +71,16 @@ public class TradeManager {
 
     private void loadTrades() {
         final File tradeInfoFile = getTradesFileInData();
-        if (tradeInfoFile.exists()) {
-            loadTradesFromData(tradeInfoFile);
-        } else {
-            loadTradesFromStorage();
-        }
+//        if (tradeInfoFile.exists()) {
+//            loadTradesFromData(tradeInfoFile);
+//        } else {
+            loadTradesFromAssets();
+//        }
     }
 
     private File getTradesFileInData() {
-        final File tradeInfoFile = new File(mContext.getCacheDir(), TRADE_FILE_IN_SDCARD);
+        final File cacheDir = mContext.getCacheDir();
+        final File tradeInfoFile = new File(mContext.getCacheDir(), TRADE_FILE_IN_DATA);
         return tradeInfoFile;
     }
 
@@ -105,7 +106,7 @@ public class TradeManager {
         mTradeInfos = tradeInfos;
     }
 
-    private void loadTradesFromStorage() {
+    private void loadTradesFromAssets() {
         final List<Trade> tradeInfos = new ArrayList<Trade>();
         final File file = new File(TRADE_FILE_IN_SDCARD);
         InputStream in = null;
@@ -153,7 +154,7 @@ public class TradeManager {
         }
     }
 
-    public List<Trade> getTradeInfos() {
+    public List<Trade> getAllTrades() {
         return mTradeInfos;
     }
 
@@ -183,9 +184,4 @@ public class TradeManager {
     public void addOnTradeInfosChangedListener(final OnTradeInfosChangedListener listener) {
 
     }
-
-    public List<KLine> getTradeKLines() {
-        return null;
-    }
-
 }

@@ -88,6 +88,9 @@ public class Date implements Comparable<Date> {
         int year = calendar.get(Calendar.YEAR);
         date.mDate = year * 10000 + month * 100 + day;
         date.mRealDate = date.mDate * FACTOR;
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 9) {
+            return date.yesterday();
+        }
         return getCachedDate(date);
     }
 
@@ -183,6 +186,43 @@ public class Date implements Comparable<Date> {
         } else {
             return DATE_CACHE.get(dateNumber);
         }
+    }
+
+    public static boolean isValidateDate(long i) {
+        Date date = Date.parseDateFromNumber(i);
+        int day = date.day();
+        int month = date.month();
+        int year = date.year();
+        if (year < 1900 || year > 2100) {
+            return false;
+        }
+        if (month < 0 || month > 12) {
+            return false;
+        }
+        int maxDay = 0;
+        if (month == 2) {
+            if ((year - 1988) %4 == 0) {
+                maxDay = 29;
+            } else {
+                maxDay = 28;
+            }
+        } else if (month % 2 == 0) {
+            if (month < 8) {
+                maxDay = 30;
+            } else {
+                maxDay = 31;
+            }
+        } else {
+            if (month < 7) {
+                maxDay = 31;
+            } else {
+                maxDay = 30;
+            }
+        }
+        if (day < 0 || day > maxDay) {
+            return false;
+        }
+        return true;
     }
 
 }
