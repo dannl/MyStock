@@ -219,7 +219,7 @@ public class Date implements Comparable<Date> {
                 maxDay = 30;
             }
         }
-        if (day < 0 || day > maxDay) {
+        if (day <= 0 || day > maxDay) {
             return false;
         }
         return true;

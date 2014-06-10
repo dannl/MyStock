@@ -70,10 +70,10 @@ public class StockPrice implements KLineItem {
         try {
             final JSONObject result = new JSONObject();
             result.put(JSON_DATE, mDate.getDateNumber());
-            result.put(JSON_OPEN, mOpen);
-            result.put(JSON_MAX, mMax);
-            result.put(JSON_MIN, mMin);
-            result.put(JSON_CLOSE, mClose);
+            result.put(JSON_OPEN, String.valueOf(mOpen));
+            result.put(JSON_MAX, String.valueOf(mMax));
+            result.put(JSON_MIN, String.valueOf(mMin));
+            result.put(JSON_CLOSE, String.valueOf(mClose));
             result.put(JSON_VOLUME, mVolume);
             return result;
         } catch (Exception e) {

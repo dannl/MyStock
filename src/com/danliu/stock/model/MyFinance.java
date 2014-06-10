@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import com.danliu.stock.model.Trade.TradeType;
 import com.danliu.stock.trade.util.TradeManager;
 import com.danliu.stock.util.Constants;
+import com.danliu.util.Log;
 
 /**
  * MyFinance of MyStock.
@@ -121,6 +121,10 @@ public class MyFinance implements KLine {
         float capital = getCapitalInDate(date, kLines);
         for (KLine kLine : kLines) {
             if (kLine instanceof TradePair) {
+                final float openP = kLine.getMaxPrice(date);
+                if (openP != 0f) {
+                    Log.d("TEST", "plus maxp: " + kLine.getStock().getName() + " amount: " + openP);
+                }
                 capital += kLine.getMaxPrice(date);
             }
         }
@@ -133,6 +137,10 @@ public class MyFinance implements KLine {
         float capital = getCapitalInDate(date, kLines);
         for (KLine kLine : kLines) {
             if (kLine instanceof TradePair) {
+                final float openP = kLine.getMinPrice(date);
+                if (openP != 0f) {
+                    Log.d("TEST", "plus maxp: " + kLine.getStock().getName() + " amount: " + openP);
+                }
                 capital += kLine.getMinPrice(date);
             }
         }
@@ -145,6 +153,10 @@ public class MyFinance implements KLine {
         float capital = getCapitalInDate(date, kLines);
         for (KLine kLine : kLines) {
             if (kLine instanceof TradePair) {
+                final float openP = kLine.getOpenPrice(date);
+                if (openP != 0f) {
+                    Log.d("TEST", "plus open:  " + kLine.getStock().getName() + " amount: " + openP);
+                }
                 capital += kLine.getOpenPrice(date);
             }
         }
@@ -157,6 +169,10 @@ public class MyFinance implements KLine {
         float capital = getCapitalInDate(date, kLines);
         for (KLine kLine : kLines) {
             if (kLine instanceof TradePair) {
+                final float openP = kLine.getClosePrice(date);
+                if (openP != 0f) {
+                    Log.d("TEST", "plus closeP: " + kLine.getStock().getName() + " amount: " + openP);
+                }
                 capital += kLine.getClosePrice(date);
             }
         }
@@ -194,6 +210,8 @@ public class MyFinance implements KLine {
             final KLine kLine = kLines.get(i);
             if (kLine instanceof SingleTrade && kLine.fromDate().getDateNumber() <= date.getDateNumber()) {
                 capital += kLine.getOpenPrice(kLine.fromDate());
+            } else if (kLine instanceof TradePair && kLine.toDate().getDateNumber() < date.getDateNumber()) {
+                capital += ((TradePair) kLine).getDletaPrice();
             }
         }
         return capital;

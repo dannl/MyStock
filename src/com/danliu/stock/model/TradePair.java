@@ -83,6 +83,10 @@ public class TradePair implements KLine {
         return 0;
     }
 
+    public float getDletaPrice() {
+        return Math.abs(mToTrade.getTradeAmount()) - Math.abs(mFromTrade.getTradeAmount());
+    }
+
     private float getTradeCount() {
         return mFromTrade.getTradeCount();
     }

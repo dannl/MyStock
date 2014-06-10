@@ -216,11 +216,11 @@ public class Trade {
         try {
             result.put(JSON_STOCK_ID, mStock.getId());
             result.put(JSON_STOCK_NAME, mStock.getName());
-            result.put(JSON_PRICE, mTradePrice);
+            result.put(JSON_PRICE, String.valueOf(mTradePrice));
             result.put(JSON_DATE, mTradeDate);
             result.put(JSON_COUNT, mTradeCount);
-            result.put(JSON_BALANCE, mBalance);
-            result.put(JSON_AMOUNT, mTradeAmount);
+            result.put(JSON_BALANCE, String.valueOf(mBalance));
+            result.put(JSON_AMOUNT, String.valueOf(mTradeAmount));
             result.put(JSON_TYPE, mTradeType.toString());
         } catch (JSONException e) {
         }
@@ -250,6 +250,7 @@ public class Trade {
     public static void stockCountChangeToBuySellPair(List<Trade> countChanges,
             List<Trade> buys, List<Trade> sells) {
         for (Trade trade : countChanges) {
+            com.danliu.util.Log.d("TEST", "stockCountChangeToBuySellPair for " + trade.getStock().getName() + " " + trade.getTradeDate());
             final long date = trade.getTradeDate().getDateNumber();
             int buyCount = 0;
             int insertIndexInBuys = 0;
@@ -296,6 +297,7 @@ public class Trade {
      * @return
      */
     public Trade seperate(int tradeCount) {
+        Log.d("TEST", "seperate trade: " + this + " trade count:" + tradeCount);
         final Trade result = new Trade(mStock);
         result.mTradeDate = mTradeDate;
         float factor = ((float) tradeCount) / mTradeCount;

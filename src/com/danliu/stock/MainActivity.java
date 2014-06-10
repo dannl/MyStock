@@ -35,7 +35,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final List<Trade> tradeInfos = TradeManager.getInstance().getAllTrades();
-//        for (Trade tradeInfo : tradeInfos) {
+        float parsed = Float.parseFloat("3.12");
+        float value = Float.valueOf("3.12");
+        Log.d("TEST", "parse: " + parsed + " value: " + value);
+        //        for (Trade tradeInfo : tradeInfos) {
 //            for (int i = 0; i < 10000; i++) {
 //                if (i == 1) {
 //                    break;
@@ -70,6 +73,9 @@ public class MainActivity extends Activity {
                 for (long i = fromDate.getDateNumber(); i <= toDate.getDateNumber(); i++) {
                     if (!Date.isValidateDate(i)) {
                         continue;
+                    }
+                    if (i == 20140610) {
+                        int fu = 1;
                     }
                     Date date = Date.parseDateFromNumber(i);
                     Log.d("TEST", "date: " + date.toString() + " OPEN: " + finance.getOpenPrice(date) + " MAX:" + finance.getMaxPrice(date) + " MIN: " + finance.getMinPrice(date) + " CLOSE: " + finance.getClosePrice(date));
