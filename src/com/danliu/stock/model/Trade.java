@@ -175,8 +175,6 @@ public class Trade {
                 tradeInfo.mTradeType = TradeType
                         .get(splitResult[INDEX_TYPE - 1]);
             } else {
-                tradeInfo.mStock = new Stock(splitResult[INDEX_ID],
-                        splitResult[INDEX_NAME]);
                 tradeInfo.mTradeDate = Date.parseDateFromNumber(Long
                         .parseLong(splitResult[INDEX_DATE]));
                 tradeInfo.mTradeAmount = Float
@@ -184,9 +182,16 @@ public class Trade {
                 tradeInfo.mBalance = Float
                         .parseFloat(splitResult[INDEX_BALANCE]);
                 tradeInfo.mTradeType = TradeType.get(splitResult[INDEX_TYPE]);
+                if (tradeInfo.mTradeType == TradeType.NONE) {
+                    tradeInfo.mStock = Stock.createCustomStock(splitResult[INDEX_ID],
+                            splitResult[INDEX_NAME]);
+                } else {
+                    tradeInfo.mStock = Stock.createStock(splitResult[INDEX_ID],
+                            splitResult[INDEX_NAME]);
+                }
                 try {
-                    tradeInfo.mTradeCount = Math.abs((int) Float
-                            .parseFloat(splitResult[INDEX_COUNT]));
+                    tradeInfo.mTradeCount = (int) Float
+                            .parseFloat(splitResult[INDEX_COUNT]);
                     tradeInfo.mTradePrice = Float
                             .parseFloat(splitResult[INDEX_PRICE]);
                 } catch (Exception e) {
@@ -235,7 +240,7 @@ public class Trade {
         Trade result = new Trade();
         final String id = jsonObject.getString(JSON_STOCK_ID);
         final String name = jsonObject.getString(JSON_STOCK_NAME);
-        result.mStock = new Stock(id, name);
+        result.mStock = Stock.createStock(id, name);
         result.mBalance = Float.parseFloat(jsonObject.getString(JSON_BALANCE));
         result.mTradeAmount = Float.parseFloat(jsonObject
                 .getString(JSON_AMOUNT));

@@ -21,6 +21,7 @@ import java.util.HashMap;
 
 /**
  * Date of MyStock.
+ *
  * @author danliu
  *
  */
@@ -33,21 +34,20 @@ public class Date implements Comparable<Date> {
     private static final HashMap<String, Integer> MONTH = new HashMap<String, Integer>();
     private static final LongSparseArray<Date> DATE_CACHE = new LongSparseArray<Date>();
 
-     static {
-         MONTH.put("Jan", 1);
-         MONTH.put("Feb", 2);
-         MONTH.put("Mar", 3);
-         MONTH.put("Apr", 4);
-         MONTH.put("May", 5);
-         MONTH.put("Jun", 6);
-         MONTH.put("Jul", 7);
-         MONTH.put("Aug", 8);
-         MONTH.put("Sep", 9);
-         MONTH.put("Oct", 10);
-         MONTH.put("Nov", 11);
-         MONTH.put("Dec", 12);
-     }
-
+    static {
+        MONTH.put("Jan", 1);
+        MONTH.put("Feb", 2);
+        MONTH.put("Mar", 3);
+        MONTH.put("Apr", 4);
+        MONTH.put("May", 5);
+        MONTH.put("Jun", 6);
+        MONTH.put("Jul", 7);
+        MONTH.put("Aug", 8);
+        MONTH.put("Sep", 9);
+        MONTH.put("Oct", 10);
+        MONTH.put("Nov", 11);
+        MONTH.put("Dec", 12);
+    }
 
     private long mRealDate;
     private long mDate;
@@ -101,7 +101,8 @@ public class Date implements Comparable<Date> {
         final Date date = new Date();
         final String[] splited = dateString.split("\\s+");
         int month = MONTH.get(splited[0]);
-        int day = Integer.parseInt(splited[1].substring(0, splited[1].lastIndexOf(",")));
+        int day = Integer.parseInt(splited[1].substring(0,
+                splited[1].lastIndexOf(",")));
         int year = Integer.parseInt(splited[2]);
         date.mDate = year * 10000 + month * 100 + day;
         date.mRealDate = date.mDate * FACTOR;
@@ -139,29 +140,11 @@ public class Date implements Comparable<Date> {
         int year = year();
         if (day == 1) {
             if (month == 1) {
-                year -=1;
+                year -= 1;
                 month = 12;
             } else {
                 month -= 1;
-                if (month == 2) {
-                    if ((year - 1988) %4 == 0) {
-                        day = 29;
-                    } else {
-                        day = 28;
-                    }
-                } else if (month % 2 == 0) {
-                    if (month < 8) {
-                        day = 30;
-                    } else {
-                        day = 31;
-                    }
-                } else {
-                    if (month < 7) {
-                        day = 31;
-                    } else {
-                        day = 30;
-                    }
-                }
+                day = getMonthDay(month, year);
             }
         } else {
             day -= 1;
@@ -179,13 +162,14 @@ public class Date implements Comparable<Date> {
     }
 
     private static final Date getCachedDate(final Date date) {
-        long dateNumber = date.getDateNumber();
-        if (DATE_CACHE.get(dateNumber) == null) {
-            DATE_CACHE.put(dateNumber, date);
-            return date;
-        } else {
-            return DATE_CACHE.get(dateNumber);
-        }
+        // long dateNumber = date.getDateNumber();
+        // if (DATE_CACHE.get(dateNumber) == null) {
+        // DATE_CACHE.put(dateNumber, date);
+        // return date;
+        // } else {
+        // return DATE_CACHE.get(dateNumber);
+        // }
+        return date;
     }
 
     public static boolean isValidateDate(long i) {
@@ -200,8 +184,17 @@ public class Date implements Comparable<Date> {
             return false;
         }
         int maxDay = 0;
+        maxDay = getMonthDay(month, year);
+        if (day <= 0 || day > maxDay) {
+            return false;
+        }
+        return true;
+    }
+
+    private static int getMonthDay(int month, int year) {
+        int maxDay;
         if (month == 2) {
-            if ((year - 1988) %4 == 0) {
+            if ((year - 1988) % 4 == 0) {
                 maxDay = 29;
             } else {
                 maxDay = 28;
@@ -219,10 +212,45 @@ public class Date implements Comparable<Date> {
                 maxDay = 30;
             }
         }
-        if (day <= 0 || day > maxDay) {
+        return maxDay;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof Date)) {
             return false;
         }
-        return true;
+        if (mDate == ((Date) o).mDate) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) mDate;
+    }
+
+    public Date daysBefore(int deltaDay) {
+        int day = day();
+        int month = month();
+        int year = year();
+        while (deltaDay > 0) {
+            if (deltaDay >= day) {
+                deltaDay -= day;
+                month--;
+                if (month == 0) {
+                    month = 12;
+                    year--;
+                }
+                day = getMonthDay(day, year);
+            } else {
+                day -= deltaDay;
+                deltaDay = 0;
+            }
+        }
+        return Date.parseDateFromNumber(year * 10000 + month * 100 + day);
+
     }
 
 }

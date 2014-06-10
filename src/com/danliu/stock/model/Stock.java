@@ -15,10 +15,14 @@
 
 package com.danliu.stock.model;
 
+import android.R.string;
+import android.util.Log;
+
 import com.danliu.stock.trade.util.StockPriceRefresher;
 import com.danliu.stock.util.Constants;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,8 +32,8 @@ import java.util.List;
  */
 public class Stock implements KLine {
 
-    public static final Stock BANK_OPERATION = new Stock("-1", "Bank Operation");
-    public static final Stock MY_FINACE = new Stock("-2", "My Finance");
+    public static final Stock BANK_OPERATION = new CustomStock("-1", "Bank Operation");
+    public static final Stock MY_FINACE = new CustomStock("-2", "My Finance");
     private String mId;
     private String mName;
     private String mPrefixForGoogle;
@@ -39,7 +43,7 @@ public class Stock implements KLine {
     private List<StockPrice> mHistoricalPrices;
     private StockPrice mCurrentPrice;
 
-    public Stock(String id, String name) {
+    protected Stock(String id, String name) {
         mId = id;
         mName = name;
         if (id.startsWith("60")) {
@@ -79,9 +83,7 @@ public class Stock implements KLine {
     }
 
     public boolean needUpdateHistoricalPrices() {
-        final Date date = Date.parseDateFromCalendar(Calendar.getInstance());
-        return !(mHistoricalPrices != null && mHistoricalPrices.size() > 0 && mHistoricalPrices
-                .get(0).getDate().getDateNumber() == date.getDateNumber());
+        return !(mHistoricalPrices != null && mHistoricalPrices.size() > 0);
     }
 
     public void setHistoricalPrice(final List<StockPrice> prices) {
@@ -92,6 +94,7 @@ public class Stock implements KLine {
         if (mStockPrices == null) {
             mStockPrices = new ArrayList<StockPrice>(prices.size() + 1);
         }
+        Log.d("TEST", "set historical price for " + this);
         mStockPrices.addAll(prices);
     }
 
@@ -156,7 +159,7 @@ public class Stock implements KLine {
             return null;
         }
         for (StockPrice stockPrice : prices) {
-            if (stockPrice.getDate() == date) {
+            if (stockPrice.getDate().equals(date)) {
                 return stockPrice;
             }
         }
@@ -184,5 +187,26 @@ public class Stock implements KLine {
     @Override
     public void refreshPrices() {
         StockPriceRefresher.getInstance().refreshStockPrice(this);
+    }
+
+    private static final HashMap<String, Stock> STOCK_CACHE = new HashMap<String, Stock>();
+    public static final Stock createStock(final String id, final String name) {
+        if (STOCK_CACHE.containsKey(id)) {
+            return STOCK_CACHE.get(id);
+        } else {
+            final Stock stock = new Stock(id, name);
+            STOCK_CACHE.put(id, stock);
+            return stock;
+        }
+    }
+
+    public static Stock createCustomStock(String id, String name) {
+        if (STOCK_CACHE.containsKey(id)) {
+            return STOCK_CACHE.get(id);
+        } else {
+            final Stock stock = new CustomStock(id, name);
+            STOCK_CACHE.put(id, stock);
+            return stock;
+        }
     }
 }

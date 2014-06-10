@@ -23,7 +23,7 @@ import java.util.HashMap;
  */
 public class Constants {
 
-    public static final long STARTING_DATE = 20140401;
+    public static final long STARTING_DATE = 20140414;
 
     public static final String SH_FOR_GOOGLE = "SHA";
 
