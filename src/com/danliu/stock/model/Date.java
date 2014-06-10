@@ -18,6 +18,7 @@ import android.support.v4.util.LongSparseArray;
 import android.util.SparseArray;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.IllegalFormatCodePointException;
 
 /**
  * Date of MyStock.
@@ -26,6 +27,9 @@ import java.util.HashMap;
  *
  */
 public class Date implements Comparable<Date> {
+
+    private static final int[] MONTH_DAYS_FLAT = new int[] {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    private static final int[] MONTH_DAYS_NONE_FLAT = new int[] {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     /**
      * FACTOR
@@ -251,6 +255,72 @@ public class Date implements Comparable<Date> {
         }
         return Date.parseDateFromNumber(year * 10000 + month * 100 + day);
 
+    }
+
+    public static int deltaDay(Date fromDate, Date date) {
+        if (fromDate.getDateNumber() > date.getDateNumber()) {
+            throw new IllegalArgumentException("bad params,");
+        }
+        int day = fromDate.day();
+        int month = fromDate.month();
+        int year = fromDate.year();
+        int toDay = date.day();
+        int toMonth = date.month();
+        int toYear = date.year();
+        int deltaDay = 0;
+        while (day == toDay && year == toYear && month == toMonth) {
+            if (toYear - year > 1) {
+                year ++;
+                if (month <= 2) {
+                    if ((year - 1 - 1988) % 4 == 0) {
+                        deltaDay += 366;
+                    } else {
+                        deltaDay += 365;
+                    }
+                } else {
+                    if ((year - 1988) % 4 == 0) {
+                        deltaDay += 366;
+                    } else {
+                        deltaDay += 365;
+                    }
+                }
+            } else if (toYear - year == 1) {
+                deltaDay += restDaysOfYear(year, month, day);
+                year ++;
+                month = 1;
+                day = 1;
+            } else {
+                int[] monthDays;
+                if ((year - 1988) % 4 == 0) {
+                    monthDays = MONTH_DAYS_NONE_FLAT;
+                } else {
+                    monthDays = MONTH_DAYS_FLAT;
+                }
+                for (int i = month; i < toMonth; i++) {
+                    deltaDay += monthDays[i];
+                }
+                deltaDay += toDay;
+                deltaDay -= day;
+                month = toMonth;
+                day = toDay;
+            }
+        }
+        return deltaDay;
+    }
+
+    private static int restDaysOfYear(int year, int month, int day) {
+        int[] monthDays;
+        if ((year - 1988) % 4 == 0) {
+            monthDays = MONTH_DAYS_NONE_FLAT;
+        } else {
+            monthDays = MONTH_DAYS_FLAT;
+        }
+        int days = 0;
+        for (int i = month; i < monthDays.length; i++) {
+            days += monthDays[i];
+        }
+        days -= day;
+        return days;
     }
 
 }
