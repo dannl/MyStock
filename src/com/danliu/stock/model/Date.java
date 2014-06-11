@@ -323,4 +323,12 @@ public class Date implements Comparable<Date> {
         return days;
     }
 
+    public void moveToLatest() {
+        mRealDate = mDate * FACTOR + FACTOR - 1;
+    }
+
+    public void moveToEarliest() {
+        mRealDate = mDate * FACTOR;
+    }
+
 }

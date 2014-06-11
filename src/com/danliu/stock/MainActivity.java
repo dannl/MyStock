@@ -143,9 +143,16 @@ public class MainActivity extends Activity {
                 ((ContentView) convertView).bind(null, 0, 0, 0, 0);
             } else {
                 final Date date = (Date) getItem(position);
-                ((ContentView) convertView).bind(date,
-                        mKLine.getOpenPrice(date), mKLine.getMaxPrice(date),
-                        mKLine.getMinPrice(date), mKLine.getClosePrice(date));
+                if (date.getDateNumber() == 20140609l) {
+                    int i = 0;
+                }
+                date.moveToEarliest();
+                float open = mKLine.getOpenPrice(date);
+                date.moveToLatest();
+                float max = mKLine.getMaxPrice(date);
+                float min = mKLine.getMinPrice(date);
+                float close = mKLine.getClosePrice(date);
+                ((ContentView) convertView).bind(date, open, max, min, close);
             }
             return convertView;
         }
@@ -175,8 +182,10 @@ public class MainActivity extends Activity {
                 } else {
                     if (open > close) {
                         setTextColor(0xff00882a);
-                    } else {
+                    } else if (open < close) {
                         setTextColor(Color.RED);
+                    } else {
+                        setTextColor(Color.BLACK);
                     }
                     ((TextView) getChildAt(0)).setText(date.toString());
                     ((TextView) getChildAt(1)).setText(String.valueOf(open));

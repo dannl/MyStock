@@ -282,7 +282,7 @@ public class MyFinance implements KLine {
         for (int i = 0; i < size; i++) {
             final Trade trade = allTrades.get(i);
             TradeType tradeType = trade.getTradeType();
-            if (trade.getTradeDate().getDateNumber() > date.getDateNumber()
+            if (trade.getTradeDate().compareTo(date) > 0
                     || tradeType == TradeType.TRANSFER_IN
                     || tradeType == TradeType.TRANSFER_OUT
                     || tradeType == TradeType.NONE) {
@@ -305,7 +305,7 @@ public class MyFinance implements KLine {
         float balance = 0;
         for (int i = size - 1; i >= 0; i--) {
             final Trade trade = allTrades.get(i);
-            if (date.getDateNumber() >= trade.getTradeDate().getDateNumber()) {
+            if (trade.getTradeDate().compareTo(date) < 0) {
                 balance = trade.getBalance();
                 break;
             }
