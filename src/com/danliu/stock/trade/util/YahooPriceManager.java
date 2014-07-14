@@ -97,59 +97,51 @@ public class YahooPriceManager {
         final String downloadUrl = String.format(Constants.HISTORY_DOWNLOAD_URL, stock.getId(),
                 stock.getPrefixForYahoo(), fromDate.month() - 1, fromDate.day(), fromDate.year(),
                 currentDate.month(), currentDate.day(), currentDate.year());
-//        Log.d("TEST", downloadUrl);
+        // Log.d("TEST", downloadUrl);
         final File tempFile = new File(getCacheDir(), "temp");
         HttpUtils.downloadFile(downloadUrl, tempFile, 1024 * 1024 * 10, false);
-        final List<StockPrice> prices = dealWithRequestResult(stock, tempFile);
-        mPreferences.edit().putLong(stock.getId(), currentDate.getDateNumber()).apply();;
-        return prices;
+        try {
+            final List<StockPrice> prices = dealWithRequestResult(stock, tempFile);
+            mPreferences.edit().putLong(stock.getId(), currentDate.getDateNumber()).apply();
+            ;
+            return prices;
+        } catch (Exception e) {
+        }
+        return null;
     }
 
-    private List<StockPrice> dealWithRequestResult(final Stock stock, final File tempFile) {
+    @SuppressWarnings("resource")
+    private List<StockPrice> dealWithRequestResult(final Stock stock, final File tempFile) throws IOException, JSONException {
         final List<StockPrice> prices = new ArrayList<StockPrice>();
-        try {
-            @SuppressWarnings("resource")
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tempFile))));
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-//                Log.d("TEST", line);
-                try {
-                    final StockPrice price = StockPrice.parseStringLine(line);
-                    prices.add(price);
-                } catch (Exception e) {
-                }
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(
+                new FileInputStream(tempFile))));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            // Log.d("TEST", line);
+            try {
+                final StockPrice price = StockPrice.parseStringLine(line);
+                prices.add(price);
+            } catch (Exception e) {
             }
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
         }
         boolean flushCache = !prices.isEmpty();
         final File cachedFile = new File(getCacheDir(), stock.getId());
-        try {
+        if (cachedFile.exists()) {
             FileInputStream in = new FileInputStream(cachedFile);
             final byte[] buffer = new byte[in.available()];
             JSONArray array = new JSONArray(new String(buffer));
             int length = array.length();
             for (int i = 0; i < length; i++) {
-                try {
-                    final StockPrice price = StockPrice.parseJson(array.getJSONObject(i));
-                    prices.add(price);
-                } catch (Exception e) {
-                }
+                final StockPrice price = StockPrice.parseJson(array.getJSONObject(i));
+                prices.add(price);
             }
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        } catch (JSONException e) {
         }
         if (flushCache) {
             JSONArray arrayToSave = new JSONArray();
             for (int i = 0; i < prices.size(); i++) {
                 arrayToSave.put(prices.get(i).toJsonObject());
             }
-            try {
-                IOUtilities.saveToFile(cachedFile, arrayToSave.toString(), "UTF-8");
-            } catch (IOException e) {
-                Log.w(e);
-            }
+            IOUtilities.saveToFile(cachedFile, arrayToSave.toString(), "UTF-8");
         }
         return prices;
     }

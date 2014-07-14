@@ -12,6 +12,7 @@
  *    @version: 1.0
  *
  ******************************************************************************/
+
 package com.danliu.stock.model;
 
 import android.support.v4.util.LongSparseArray;
@@ -24,12 +25,15 @@ import java.util.IllegalFormatCodePointException;
  * Date of MyStock.
  *
  * @author danliu
- *
  */
 public class Date implements Comparable<Date> {
 
-    private static final int[] MONTH_DAYS_FLAT = new int[] {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    private static final int[] MONTH_DAYS_NONE_FLAT = new int[] {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    private static final int[] MONTH_DAYS_FLAT = new int[] {
+            0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+    private static final int[] MONTH_DAYS_NONE_FLAT = new int[] {
+            0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
 
     /**
      * FACTOR
@@ -105,8 +109,7 @@ public class Date implements Comparable<Date> {
         final Date date = new Date();
         final String[] splited = dateString.split("\\s+");
         int month = MONTH.get(splited[0]);
-        int day = Integer.parseInt(splited[1].substring(0,
-                splited[1].lastIndexOf(",")));
+        int day = Integer.parseInt(splited[1].substring(0, splited[1].lastIndexOf(",")));
         int year = Integer.parseInt(splited[2]);
         date.mDate = year * 10000 + month * 100 + day;
         date.mRealDate = date.mDate * FACTOR;
@@ -166,14 +169,13 @@ public class Date implements Comparable<Date> {
     }
 
     private static final Date getCachedDate(final Date date) {
-        // long dateNumber = date.getDateNumber();
-        // if (DATE_CACHE.get(dateNumber) == null) {
-        // DATE_CACHE.put(dateNumber, date);
-        // return date;
-        // } else {
-        // return DATE_CACHE.get(dateNumber);
-        // }
-        return date;
+        long dateNumber = date.getDateNumber();
+        if (DATE_CACHE.get(dateNumber) == null) {
+            DATE_CACHE.put(dateNumber, date);
+            return date;
+        } else {
+            return DATE_CACHE.get(dateNumber);
+        }
     }
 
     public static boolean isValidateDate(long i) {
@@ -270,7 +272,7 @@ public class Date implements Comparable<Date> {
         int deltaDay = 0;
         while (day == toDay && year == toYear && month == toMonth) {
             if (toYear - year > 1) {
-                year ++;
+                year++;
                 if (month <= 2) {
                     if ((year - 1 - 1988) % 4 == 0) {
                         deltaDay += 366;
@@ -286,7 +288,7 @@ public class Date implements Comparable<Date> {
                 }
             } else if (toYear - year == 1) {
                 deltaDay += restDaysOfYear(year, month, day);
-                year ++;
+                year++;
                 month = 1;
                 day = 1;
             } else {

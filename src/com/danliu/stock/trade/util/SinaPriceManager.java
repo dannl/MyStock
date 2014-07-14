@@ -29,7 +29,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -46,6 +45,7 @@ public class SinaPriceManager {
             + "U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/10 (KHTML, "
             + "like Gecko) Version/5.0 Safari/10";
     private static final String PREF_NAME = "sina";
+    private static final String KEY_CACHED_PRICE_TAIL = "_last_cached";
     private HashMap<String, StockPrice> PRICE_CACHE = new HashMap<String, StockPrice>();
     private static final long REFRESH_INTERVAL = 120 * 1000;
 
@@ -57,6 +57,7 @@ public class SinaPriceManager {
     }
 
     private SharedPreferences mPreferences;
+
     private SinaPriceManager(final Context context) {
         mPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
@@ -69,6 +70,41 @@ public class SinaPriceManager {
         if (PRICE_CACHE.containsKey(stockId) && current - lastUpdate < REFRESH_INTERVAL) {
             return PRICE_CACHE.get(stockId);
         }
+        StockPrice price = requestPriceFromServer(stock, stockId, current);
+        if (price == null) {
+            price = loadCachedPrice(stockId, lastUpdate, current);
+        }
+        if (price != null) {
+            PRICE_CACHE.put(stockId, price);
+        }
+        return price;
+    }
+
+    private StockPrice loadCachedPrice(final String stockId, final long lastUpdate,
+            final long current) {
+        if (lastUpdate != 0) {
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(current);
+            int currentYear = c.get(Calendar.YEAR);
+            int currentMonth = c.get(Calendar.MONTH);
+            int currentDay = c.get(Calendar.DAY_OF_MONTH);
+            c.setTimeInMillis(lastUpdate);
+            if (currentYear == c.get(Calendar.YEAR) && currentMonth == c.get(Calendar.MONTH)
+                    && currentDay == c.get(Calendar.DAY_OF_MONTH)) {
+                final String cachedPrice = mPreferences.getString(stockId + KEY_CACHED_PRICE_TAIL,
+                        "");
+                try {
+                    StockPrice price = StockPrice.parseSinaRequestResult(cachedPrice);
+                    return price;
+                } catch (Exception e) {
+                }
+            }
+        }
+        return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    private StockPrice requestPriceFromServer(final Stock stock, String stockId, final long current) {
         final String url = String.format(Constants.CURRENT_PRICE_URL, stock.getPrefixForSina(),
                 stockId);
         HttpRequester.Builder builder = new HttpRequester.Builder(url);
@@ -77,16 +113,15 @@ public class SinaPriceManager {
         try {
             final HttpRequestResult result = builder.build().request();
             if (result.status.getStatusCode() == HttpStatus.SC_OK) {
-                final StockPrice price = StockPrice.parseSinaRequestResult(HttpUtils.decodeEntityAsString(result.entity));
+                String serverResultStr = HttpUtils.decodeEntityAsString(result.entity);
+                final StockPrice price = StockPrice.parseSinaRequestResult(serverResultStr);
                 mPreferences.edit().putLong(stockId, current).apply();
-                PRICE_CACHE.put(stockId, price);
                 return price;
             }
         } catch (IOException e) {
         } catch (Exception e) {
         }
         return null;
-
     }
 
 }
